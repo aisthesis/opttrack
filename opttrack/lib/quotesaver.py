@@ -5,9 +5,9 @@
 Save options quotes to mongodb
 """
 
-import config
-import constants
-from dbtools import insert_many
+from . import config
+from . import constants
+from .dbtools import insert_many
 
 def savequotes(quotes, logger, client):
     logger.info('saving {} quotes'.format(len(quotes)))

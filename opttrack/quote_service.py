@@ -13,19 +13,21 @@ import signal
 import sys
 import time
 
+from delayqueue import *
 from pandas.tseries.offsets import BDay
 import pynance as pn
 import pytz
 
-import config
-import constants
-from dbwrapper import job
-from delayqueue import *
-from quoteextractor import QuoteExtractor
-from quotesaver import savequotes
-from trackpuller import TrackPuller
+from lib import config
+from lib import constants
+from lib.dbwrapper import job
+from lib.quoteextractor import QuoteExtractor
+from lib.quotesaver import savequotes
+from lib.trackpuller import TrackPuller
 
-class TrackQuoteMediator(object):
+SERVICE_NAME = 'quote_service'
+
+class QuoteService(object):
 
     def __init__(self):
         self.logger = _getlogger()
@@ -134,7 +136,7 @@ def _is_bday(date):
     return date.day == ((date + BDay()) - BDay()).day
 
 def _getlogger():
-    logger = logging.getLogger('tqmediator')
+    logger = logging.getLogger(SERVICE_NAME)
     loglevel = logging.INFO if config.ENV == 'prod' else logging.DEBUG
     logger.setLevel(loglevel)
     log_dir = _getlogdir()
@@ -145,7 +147,7 @@ def _getlogger():
     return logger
 
 def _getlogdir():
-    log_dir = os.path.normpath(os.path.join(config.LOG_ROOT, constants.LOG['path']))
+    log_dir = os.path.normpath(os.path.join(config.LOG_ROOT, constants.LOG['path'], SERVICE_NAME))
     try:
         os.makedirs(log_dir)
     except OSError:
@@ -154,4 +156,4 @@ def _getlogdir():
     return log_dir
 
 if __name__ == '__main__':
-    TrackQuoteMediator().start_daemon()
+    QuoteService().start_daemon()

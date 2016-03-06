@@ -11,7 +11,7 @@ Opens and closes db connection.
 """
 from pymongo import MongoClient
 
-import config
+from . import config
 
 def job(logger, fn):
     _client = MongoClient(config.MONGO_CLIENT['host'], config.MONGO_CLIENT['port'])

@@ -7,7 +7,7 @@ Constants for working with an options database
 
 LOG = {
         'format': "%(asctime)s %(levelname)s %(module)s.%(funcName)s : %(message)s",
-        'path': 'mfstockmkt/options/db'
+        'path': 'opttrack',
         }
 
 DB = {

@@ -8,9 +8,9 @@ Get options to be tracked
 import datetime as dt
 from bson.codec_options import CodecOptions
 
-import config
-import constants
-from dbwrapper import job
+from . import config
+from . import constants
+from .dbwrapper import job
 
 class TrackPuller(object):
 

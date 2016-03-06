@@ -20,7 +20,7 @@ Example entry:
     }
 """
 
-import constants
+from . import constants
 
 class QuoteExtractor(object):
 

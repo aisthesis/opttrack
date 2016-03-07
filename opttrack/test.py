@@ -1,8 +1,10 @@
 from lib import constants
+from lib.indices import COLLS 
 
-def show():
-    print(constants.MAX_RETRIES)
-    #print(__package__)
+def show(keys, unique, background):
+    print(keys)
+    print(unique)
+    print(background)
 
 if __name__ == '__main__':
-    show()
+    show(**COLLS['watchList'], background=True)

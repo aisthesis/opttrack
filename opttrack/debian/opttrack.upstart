@@ -1,0 +1,19 @@
+# Ubuntu upstart file at /etc/init/opttrack.conf
+# Cf. https://github.com/mongodb/mongo/blob/master/debian/mongod.upstart
+
+start on runlevel [2345]
+stop on runlevel [06]
+
+script
+    DAEMON_USER="opttrack"
+    CMD="/home/$DAEMON_USER/.virtualenvs/opttrack/bin/python"
+    SERVICE="/home/$DAEMON_USER/workspace/opttrack/opttrack/quote_service.py"
+    DAEMON_MGR="start-stop-daemon"
+    PIDFILE="/var/run/$DAEMON_USER.pid"
+
+    exec $DAEMON_MGR --start \
+        --chuid $DAEMON_USER:$DAEMON_USER \
+        --pidfile $PIDFILE \
+        --make-pidfile \
+        --exec $CMD $SERVICE
+end script

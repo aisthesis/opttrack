@@ -7,8 +7,6 @@ Mediator for workflow to save specific options.
 
 import datetime as dt
 from functools import partial
-import logging
-import os
 import signal
 import sys
 import time
@@ -21,6 +19,7 @@ import pytz
 from lib import config
 from lib import constants
 from lib.dbwrapper import job
+from lib.logutil import getlogger
 from lib.quoteextractor import QuoteExtractor
 from lib.quotesaver import savequotes
 from lib.trackpuller import TrackPuller
@@ -30,7 +29,7 @@ SERVICE_NAME = 'quote_service'
 class QuoteService(object):
 
     def __init__(self):
-        self.logger = _getlogger()
+        self.logger = getlogger(SERVICE_NAME)
         self.prod = config.ENV == 'prod'
         self.tznyse = pytz.timezone('US/Eastern')
         self.done_today = False
@@ -134,26 +133,6 @@ class QuoteService(object):
 
 def _is_bday(date):
     return date.day == ((date + BDay()) - BDay()).day
-
-def _getlogger():
-    logger = logging.getLogger(SERVICE_NAME)
-    loglevel = logging.INFO if config.ENV == 'prod' else logging.DEBUG
-    logger.setLevel(loglevel)
-    log_dir = _getlogdir()
-    handler = logging.FileHandler(os.path.join(log_dir, 'service.log'))
-    formatter = logging.Formatter(constants.LOG['format'])
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
-    return logger
-
-def _getlogdir():
-    log_dir = os.path.normpath(os.path.join(config.LOG_ROOT, constants.LOG['path'], SERVICE_NAME))
-    try:
-        os.makedirs(log_dir)
-    except OSError:
-        if not os.path.isdir(log_dir):
-            raise
-    return log_dir
 
 if __name__ == '__main__':
     QuoteService().start_daemon()

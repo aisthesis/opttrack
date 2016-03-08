@@ -10,6 +10,9 @@ Tools for working with mongo
 
 from pymongo.errors import BulkWriteError
 
+from . import config
+from . import constants
+
 def insert_many(logger, coll, entries):
     bulk = coll.initialize_unordered_bulk_op()
     for entry in entries:
@@ -22,3 +25,9 @@ def insert_many(logger, coll, entries):
         raise
     else:
         logger.info('{} records saved'.format(result['nInserted']))
+
+def getcoll(client, collname, **kwargs):
+    dbname = constants.DB[config.ENV]['name']
+    _db = client[dbname]
+    return _db.get_collection(collname, **kwargs)
+    

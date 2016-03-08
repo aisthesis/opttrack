@@ -14,6 +14,7 @@ import pytz
 
 from lib import config
 from lib import constants
+from lib.dbtools import getcoll
 from lib.dbwrapper import job
 from lib.logutil import getlogger
 
@@ -135,7 +136,7 @@ def _get_dgbentries(underlying, straddleexp, straddlestrike, farexp, distance):
 
 def _show_all_fromdb(tz, underlying, logger, client):
     c_opts = CodecOptions(tz_aware=True)
-    trackcoll = _get_trackcoll(client, codec_options=c_opts)
+    trackcoll = getcoll(client, 'track', codec_options=c_opts)
     print('\nEntries for {}:\n'.format(underlying))
     for entry in trackcoll.find({'Underlying': underlying}):
         _show_foreq_fromdb(tz, entry)
@@ -145,15 +146,10 @@ def _show_foreq_fromdb(tz, entry):
     print('Expiry: {}'.format(entry['Expiry'].astimezone(tz).strftime('%Y-%m-%d')))
     print('Strike: {:.2f}\n'.format(entry['Strike']))
 
-def _get_trackcoll(client, **kwargs):
-    dbname = constants.DB[config.ENV]['name']
-    _db = client[dbname]
-    return _db.get_collection('track', **kwargs)
-
 def _delentry(entry, logger, client):
     logger.info('removing 1 option from track collection')
     logger.debug('deleting: {}'.format(entry))
-    trackcoll = _get_trackcoll(client)
+    trackcoll = getcoll(client, 'track')
     result = trackcoll.delete_many(entry)
     n_deleted = result.deleted_count
     if n_deleted > 0:
@@ -168,7 +164,7 @@ def _saveentries(entries, logger, client):
     msg = 'Saving {} entries'.format(len(entries))
     print(msg)
     logger.info(msg)
-    trackcoll = _get_trackcoll(client)
+    trackcoll = getcoll(client, 'track')
     bulk = trackcoll.initialize_unordered_bulk_op()
     for entry in entries:
         bulk.insert(entry)

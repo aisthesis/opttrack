@@ -10,6 +10,7 @@ from bson.codec_options import CodecOptions
 
 from . import config
 from . import constants
+from .dbtools import getcoll
 from .dbwrapper import job
 
 class TrackPuller(object):
@@ -25,10 +26,7 @@ class TrackPuller(object):
 
 def _getactive(logger, client):
     totrack = {}
-    dbname = constants.DB[config.ENV]['name']
-    _db = client[dbname]
-    c_opts = CodecOptions(tz_aware=True)
-    trackcoll = _db.get_collection('track', codec_options=c_opts)
+    trackcoll = getcoll(client, 'track', codec_options=CodecOptions(tz_aware=True))
     utcnow = dt.datetime.utcnow()
     for entry in trackcoll.find({'Expiry': {'$gt': utcnow}}):
         _addentry(totrack, entry)

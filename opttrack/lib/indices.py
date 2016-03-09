@@ -11,10 +11,10 @@ COLLS = {
         'quotes': {
             'keys': [
                 ('Underlying', ASCENDING),
-                ('Quote_Time',  ASCENDING),
                 ('Strike',  ASCENDING),
                 ('Expiry', ASCENDING),
                 ('Opt_Type', ASCENDING),
+                ('Quote_Time',  ASCENDING),
                 ],
             'unique': True,
             },

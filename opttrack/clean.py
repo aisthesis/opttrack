@@ -13,22 +13,43 @@ from lib.logutil import getlogger
 from lib.dbtools import getcoll
 from lib.dbwrapper import job
 
-#TODO temporary
-from lib.dbtools import create_index, create_indices
-
 SERVICE_NAME = 'clean'
 
-def clean(collnames):
+def clean_all():
     logger = getlogger(SERVICE_NAME)
-    job(logger, partial(create_indices, collnames))
+    for collname in COLLS:
+        clean(collname, logger)
+
+def clean(collname, logger=None):
+    if not logger:
+        logger = getlogger(SERVICE_NAME)
+    job(logger, partial(_clean, collname))
 
 def _clean(collname, logger, client):
-    # use indices in lib.indices
     coll = getcoll(client, collname)
-    logger.info("creating index on collection '{}'".format(collname))
-    coll.create_index(**COLLS[collname])
-    logger.info("index on '{}' created: {}".format(collname, COLLS[collname]))
+    msg = "finding duplicate records in collection '{}'".format(collname)
+    print(msg)
+    logger.info(msg)
+    _id = {}
+    for key in COLLS[collname]['keys']:
+        _id[key[0]] = '${}'.format(key[0])
+    pipeline = [
+        {"$group": {"_id": _id, "count": {"$sum": 1}}},
+        {"$match": {"count": {"$gt": 1}}},
+        ]
+    duplicates = coll.aggregate(pipeline)
+    _rm_dups(logger, coll, duplicates)
+
+def _rm_dups(logger, coll, duplicates):
+    n_removed = 0
+    for item in duplicates:
+        n_toremove = item['count'] - 1
+        for i in range(n_toremove):
+            result = coll.delete_one(item['_id'])
+            n_removed += result.deleted_count
+    msg = '{} duplicate record(s) found and removed'.format(n_removed)
+    print(msg)
+    logger.info(msg)
 
 if __name__ == '__main__':
-    collnames = ['quotes', 'track', 'watchList']
-    clean(collnames)
+    clean_all()

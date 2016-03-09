@@ -5,17 +5,33 @@
 MongoDB indices
 """
 
+from pymongo import ASCENDING
+
 COLLS = {
         'quotes': {
-            'keys': ['Underlying', 'Quote_Time', 'Strike', 'Expiry', 'Opt_Type'],
+            'keys': [
+                ('Underlying', ASCENDING),
+                ('Quote_Time',  ASCENDING),
+                ('Strike',  ASCENDING),
+                ('Expiry', ASCENDING),
+                ('Opt_Type', ASCENDING),
+                ],
             'unique': True,
             },
         'track': {
-            'keys': ['Underlying', 'Strike', 'Expiry', 'Opt_Type'],
+            'keys': [
+                ('Underlying', ASCENDING),
+                ('Strike', ASCENDING),
+                ('Expiry', ASCENDING),
+                ('Opt_Type', ASCENDING),
+                ],
             'unique': True,
             },
         'watchList': {
-            'keys': ['eq', 'spread'],
+            'keys': [
+                ('eq', ASCENDING),
+                ('spread', ASCENDING),
+                ],
             'unique': True,
             },
         }

@@ -18,6 +18,7 @@ import pytz
 
 from lib import config
 from lib import constants
+from lib.dbtools import create_index
 from lib.dbwrapper import job
 from lib.logutil import getlogger
 from lib.quoteextractor import QuoteExtractor
@@ -48,6 +49,8 @@ class QuoteService(object):
 
     def _run_job(self):
         self.done_today = False
+        # ensure unique index on 'quotes' collection
+        job(self.logger, partial(create_index, 'quotes'))
         trackpuller = TrackPuller(self.logger)
         totrack = trackpuller.get()
         queue = DelayQueue()

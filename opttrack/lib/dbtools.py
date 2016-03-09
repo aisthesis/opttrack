@@ -8,10 +8,11 @@ Tools for working with mongo
 .. currentmodule:: dbtools
 """
 
-from pymongo.errors import BulkWriteError
+from pymongo.errors import BulkWriteError, DuplicateKeyError
 
 from . import config
 from . import constants
+from .indices import COLLS
 
 def insert_many(logger, coll, entries):
     bulk = coll.initialize_unordered_bulk_op()
@@ -31,3 +32,17 @@ def getcoll(client, collname, **kwargs):
     _db = client[dbname]
     return _db.get_collection(collname, **kwargs)
     
+def create_index(collname, logger, client):
+    create_indices([collname,], logger, client)
+
+def create_indices(collnames, logger, client):
+    for collname in collnames:
+        coll = getcoll(client, collname)
+        logger.info("creating index on collection '{}'".format(collname))
+        try:
+            coll.create_index(**COLLS[collname])
+        except DuplicateKeyError:
+            logger.exception("index creation on '{}' failed: {}".format(collname, COLLS[collname]))
+        else:
+            logger.info("index on '{}' created: {}".format(collname, COLLS[collname]))
+

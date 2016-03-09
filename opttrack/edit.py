@@ -14,7 +14,7 @@ import pytz
 
 from lib import config
 from lib import constants
-from lib.dbtools import getcoll
+from lib.dbtools import create_index, getcoll
 from lib.dbwrapper import job
 from lib.logutil import getlogger
 
@@ -41,6 +41,8 @@ class Menu(object):
         self.logger.debug('logger created')
 
     def start(self):
+        # ensure unique index on 'track' collection
+        job(self.logger, partial(create_index, 'track'))
         proceed = True
         while proceed:
             print('\nMain menu:')

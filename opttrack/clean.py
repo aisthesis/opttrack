@@ -10,18 +10,25 @@ from functools import partial
 from lib import constants
 from lib.indices import COLLS 
 from lib.logutil import getlogger
+from lib.dbtools import getcoll
 from lib.dbwrapper import job
+
+#TODO temporary
+from lib.dbtools import create_index, create_indices
 
 SERVICE_NAME = 'clean'
 
-def clean(coll):
+def clean(collnames):
     logger = getlogger(SERVICE_NAME)
-    job(logger, partial(_clean, coll))
+    job(logger, partial(create_indices, collnames))
 
-def _clean(coll, logger, client):
+def _clean(collname, logger, client):
     # use indices in lib.indices
-    pass
+    coll = getcoll(client, collname)
+    logger.info("creating index on collection '{}'".format(collname))
+    coll.create_index(**COLLS[collname])
+    logger.info("index on '{}' created: {}".format(collname, COLLS[collname]))
 
 if __name__ == '__main__':
-    coll = 'track'
-    clean(coll)
+    collnames = ['quotes', 'track', 'watchList']
+    clean(collnames)

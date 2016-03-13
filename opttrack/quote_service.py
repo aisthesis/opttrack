@@ -13,6 +13,7 @@ import time
 
 from delayqueue import *
 from pandas.tseries.offsets import BDay
+from pymongo.errors import BulkWriteError
 import pynance as pn
 import pytz
 
@@ -100,7 +101,10 @@ class QuoteService(object):
             self.logger.info('successfully retrieved options data for {}'.format(item['eq']))
             quotes = QuoteExtractor(self.logger, item['eq'], opts, self.tznyse).get(item['specs'])
             self.logger.info('{} quote(s) extracted for {}'.format(len(quotes), item['eq']))
-            job(self.logger, partial(savequotes, quotes))
+            try:
+                job(self.logger, partial(savequotes, quotes))
+            except BulkWriteError:
+                self.logger.exception('error writing to database - likely trying to enter duplicate record')
             return True
 
     def _waittoretry(self, n_retries):

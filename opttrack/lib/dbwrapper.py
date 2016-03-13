@@ -14,7 +14,7 @@ from pymongo import MongoClient
 from . import config
 
 def job(logger, fn):
-    _client = MongoClient(config.MONGO_CLIENT['host'], config.MONGO_CLIENT['port'])
+    _client = MongoClient(**config.MONGO_CLIENT)
     logger.info("db connection opened")
     try:
         _ret = fn(logger, _client)

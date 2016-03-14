@@ -17,7 +17,7 @@ MONGO_CLIENT = {
         'host': '127.0.0.1',
         'port': 27017,
         'ssl': True,
-        'ssl_certfile': '~/.ssl/client.pem',
-        'ssl_ca_certs': '~/.ssl/ca.pem',
+        'ssl_certfile': '/home/opttrack/.ssl/client.pem',
+        'ssl_ca_certs': '/home/opttrack/.ssl/ca.pem',
         'ssl_match_hostname': False,
         }

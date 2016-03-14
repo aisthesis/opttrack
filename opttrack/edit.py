@@ -17,6 +17,7 @@ from lib import constants
 from lib.dbtools import create_index, getcoll
 from lib.dbwrapper import job
 from lib.logutil import getlogger
+from lib.ui.content import show_menu
 
 SERVICE_NAME = 'edit'
 
@@ -45,12 +46,7 @@ class Menu(object):
         job(self.logger, partial(create_index, 'track'))
         proceed = True
         while proceed:
-            print('\nMain menu:')
-            print('1. Start tracking single option')
-            print('2. Start tracking spread')
-            print('3. Stop tracking single option')
-            print('4. Show tracked')
-            print('\n0. Quit')
+            show_menu('main')
             choice = input('\nEnter selection: ')
             proceed = self._exec_menu('main', choice)
         
@@ -62,9 +58,7 @@ class Menu(object):
             return True
 
     def _spread_menu(self):
-        print('\nSelect spread:')
-        print('1. Diagonal butterfly')
-        print('\n0. Return to main menu')
+        show_menu('spread')
         choice = input('\nEnter selection: ')
         return self._exec_menu('spread', choice)
 

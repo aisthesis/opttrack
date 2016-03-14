@@ -176,7 +176,7 @@ def _saveentries(entries, logger, client):
     except BulkWriteError:
         logger.exception("error writing to database")
         print('\nERROR writing to database! Entries not saved!')
-        print('You may be trying to enter a duplicate record.')
+        print('Are you trying to enter a duplicate record?')
     else:
         msg = '{} records saved'.format(result['nInserted'])
         print(msg)

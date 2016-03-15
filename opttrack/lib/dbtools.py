@@ -26,6 +26,16 @@ def insert_many(logger, coll, entries):
         raise
     else:
         logger.info('{} records saved'.format(result['nInserted']))
+        return result['nInserted']
+
+def delete_many(logger, coll, entry):
+    result = coll.delete_many(entry)
+    n_deleted = result.deleted_count
+    if n_deleted > 0:
+        logger.info('{} record deleted'.format(n_deleted))
+    else:
+        logger.warn('Record not found: {}'.format(entry))
+    return n_deleted
 
 def getcoll(client, collname, **kwargs):
     dbname = constants.DB[config.ENV]['name']

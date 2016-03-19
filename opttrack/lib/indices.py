@@ -8,6 +8,23 @@ MongoDB indices
 from pymongo import ASCENDING
 
 COLLS = {
+        'find': {
+            'keys': [
+                ('eq', ASCENDING),
+                ('spread', ASCENDING),
+                ],
+            'unique': True,
+            },
+        'observe': {
+            'keys': [
+                ('eq', ASCENDING),
+                ('spread', ASCENDING),
+                ],
+#            Other expected fields:
+#            'ref_price': 20.03,
+#            'buy': [opt1, opt2],
+#            'sell': [opt3, opt4]
+            },
         'quotes': {
             'keys': [
                 ('Underlying', ASCENDING),
@@ -24,13 +41,6 @@ COLLS = {
                 ('Strike', ASCENDING),
                 ('Expiry', ASCENDING),
                 ('Opt_Type', ASCENDING),
-                ],
-            'unique': True,
-            },
-        'watchList': {
-            'keys': [
-                ('eq', ASCENDING),
-                ('spread', ASCENDING),
                 ],
             'unique': True,
             },

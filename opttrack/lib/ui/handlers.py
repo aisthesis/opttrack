@@ -11,6 +11,8 @@ from bson.codec_options import CodecOptions
 import datetime as dt
 from functools import partial
 
+from pymongo.errors import BulkWriteError
+
 from ..dbtools import delete_many, getcoll, insert_many
 from ..dbwrapper import job
 
@@ -21,7 +23,20 @@ class Handlers(object):
         self.tz = tz
 
     def add_find(self, spread_type):
-        underlying = input('Underlying equity: ').strip().upper()
+        if _is_fromfile():
+            fname = input('Enter file name: ').strip()
+            equities = _eqs_fromfile(fname)
+        else:
+            equities = _eqs_fromblob(input('Underlying equities (GOOGL,TSLA,FB): '))
+        print('Include in future scans:\n')
+        for eq in equities:
+            print("'{}'".format(eq))
+        choice = input('\nOK to proceed (y/n)? ').lower()
+        if choice == 'y':
+            entries = _get_find_entries(equities, spread_type)
+            job(self.logger, partial(_saveentries, entries, 'find'))
+        else:
+            print('Aborting: equities NOT saved!')
         return True
 
     def track_single(self):
@@ -63,7 +78,7 @@ class Handlers(object):
         _show_track_entries(entries)
         choice = input('\nOK to proceed (y/n)? ').lower()
         if choice == 'y':
-            job(self.logger, partial(_saveentries, entries))
+            job(self.logger, partial(_saveentries, entries, 'track'))
         else:
             print('Aborting: option(s) NOT saved!')
 
@@ -108,16 +123,16 @@ def _delentry(entry, logger, client):
     else:
         print('\nNo matching entry found. Record was NOT deleted.\n')
 
-def _saveentries(entries, logger, client):
+def _saveentries(entries, collname, logger, client):
     msg = 'Saving {} entries'.format(len(entries))
     print(msg)
     logger.info(msg)
-    trackcoll = getcoll(client, 'track')
+    coll = getcoll(client, collname)
     try:
-        n_inserted = insert_many(logger, trackcoll, entries)
+        n_inserted = insert_many(logger, coll, entries)
     except BulkWriteError:
         print('\nERROR writing to database! Entries not saved!')
-        print('Are you trying to enter a duplicate record?')
+        print('Are you trying to enter duplicate records?')
     else:
         print('{} records saved'.format(n_inserted))
 
@@ -144,3 +159,23 @@ def _get_dgbentries(underlying, straddleexp, straddlestrike, farexp, distance):
         entries.append({'Underlying': underlying, 'Opt_Type': key, 'Expiry': farexp,
             'Strike': farstrikes[key]})
     return entries
+
+def _is_fromfile():
+    if input('Get list from file, 1 equity per line (y/n)? ').strip().lower() == 'y':
+        return True
+    return False
+
+def _eqs_fromblob(eqblob):
+    return sorted(map(_fmt_eq, eqblob.split(',')))
+
+def _fmt_eq(rawtxt):
+    return rawtxt.strip().upper()
+
+def _eqs_fromfile(fname):
+    equities = []
+    with open(fname, 'r') as infile:
+        equities = infile.readlines()
+    return sorted(map(_fmt_eq, equities))
+
+def _get_find_entries(equities, spread_type):
+    return [{'eq': equity, 'spread': spread_type} for equity in equities]

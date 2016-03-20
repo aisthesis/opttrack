@@ -56,3 +56,5 @@ def create_indices(collnames, logger, client):
         else:
             logger.info("index on '{}' created: {}".format(collname, COLLS[collname]))
 
+def create_all_indices(logger, client):
+    create_indices(COLLS.keys(), logger, client)

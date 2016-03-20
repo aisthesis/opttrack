@@ -18,11 +18,15 @@ SERVICE_NAME = 'clean'
 def clean_all():
     logger = getlogger(SERVICE_NAME)
     for collname in COLLS:
-        clean(collname, logger)
+        if 'unique' in COLLS[collname] and COLLS[collname]['unique']:
+            clean(collname, logger)
 
 def clean(collname, logger=None):
     if not logger:
         logger = getlogger(SERVICE_NAME)
+    if 'unique' not in COLLS[collname] or not COLLS[collname]['unique']:
+        print("no unique index on '{}', collection will not be cleaned".format(collname))
+        return
     job(logger, partial(_clean, collname))
 
 def _clean(collname, logger, client):

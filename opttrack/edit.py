@@ -9,7 +9,7 @@ from functools import partial
 
 import pytz
 
-from lib.dbtools import create_index
+from lib.dbtools import create_all_indices
 from lib.dbwrapper import job
 from lib.logutil import getlogger
 from lib.ui.edit_menu import EditMenu
@@ -25,8 +25,8 @@ class Edit(object):
         self.menu = EditMenu(self.logger, self.tz)
 
     def start(self):
-        # ensure unique index on 'track' collection
-        job(self.logger, partial(create_index, 'track'))
+        # ensure indices exist
+        job(self.logger, create_all_indices)
         while self.menu.run('main'):
             pass
 

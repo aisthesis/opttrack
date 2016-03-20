@@ -10,14 +10,14 @@ Content for interactive editor
 from functools import partial
 
 from .handlers import Handlers
+from .menu import Menu
 
-class EditMenu(object):
+class EditMenu(Menu):
 
     def __init__(self, logger, tz):
-        self.logger = logger
-        self.tz = tz
-        self.handlers = Handlers(self.logger, self.tz)
-        self.menus = {
+        super(EditMenu, self).__init__(logger, tz=tz)
+        self._handlers = Handlers(self.logger, self.tz)
+        self._menus = {
                 'main': {
                     'title': 'Main menu',
                     'choices': [
@@ -31,15 +31,15 @@ class EditMenu(object):
                             'do': partial(self.run, 'track')},
                         ]},
                 'find': {
-                    'title': 'Find',
+                    'title': 'Find (scan for trades)',
                     'choices': [
                         {   'desc': 'Return to main menu',
                             'do': lambda: True},
-                        {   'desc': 'Add from console',
-                            'do': lambda: True},
-                        {   'desc': 'Add from file',
-                            'do': lambda: True},
-                        {   'desc': 'Remove from list',
+                        {   'desc': 'Add to scan list',
+                            'do': partial(self.run, 'select_find_type')},
+#                        {   'desc': 'Add from file',
+#                            'do': lambda: True},
+                        {   'desc': 'Remove from scan list',
                             'do': lambda: True},
                         {   'desc': 'Show scanned',
                             'do': lambda: True},
@@ -68,6 +68,17 @@ class EditMenu(object):
                         {   'desc': 'Show tracked',
                             'do': self.handlers.show_tracked},
                         ]},
+                'select_find_type': {
+                    'title': 'Select spread type',
+                    'choices': [
+                        {   'desc': 'Return to main menu',
+                            'do': lambda: True},
+                        {   'desc': 'Diagonal butterfly',
+                            'do': partial(self.handlers.add_find, 'dgb')},
+                        {   'desc': 'Double calendar (not implemented)',
+                            'do': lambda: True},
+                        ]},
+
                 'track_spread': {
                     'title': 'Track spread',
                     'choices': [
@@ -80,22 +91,10 @@ class EditMenu(object):
                         ]},
                 }
 
-    def run(self, menu_key):
-        choice = self._show(menu_key)
-        return self._do(menu_key, choice)
-
-    def _show(self, menu_key):
-        menu = self.menus[menu_key]
-        choices = menu['choices']
-        print('\n{}:'.format(menu['title']))
-        for i in range(1, len(choices)):
-            print('{}. {}'.format(i, choices[i]['desc']))
-        print('\n0. {}'.format(choices[0]['desc']))
-        return int(input('\nEnter selection: '))
-
-    def _do(self, menu_key, choice):
-        try:
-            return self.menus[menu_key]['choices'][choice]['do']()
-        except IndexError:
-            print('Invalid selection')
-            return True
+    @property
+    def menus(self):
+        return self._menus
+        
+    @property
+    def handlers(self):
+        return self._handlers

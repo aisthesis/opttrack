@@ -20,6 +20,10 @@ class Handlers(object):
         self.logger = logger
         self.tz = tz
 
+    def add_find(self, spread_type):
+        underlying = input('Underlying equity: ').strip().upper()
+        return True
+
     def track_single(self):
         entry = self._get_track_entry()
         self._confirmsave((entry,))

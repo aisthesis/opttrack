@@ -37,12 +37,10 @@ class EditMenu(Menu):
                             'do': lambda: True},
                         {   'desc': 'Add to scan list',
                             'do': partial(self.run, 'select_find_type')},
-#                        {   'desc': 'Add from file',
-#                            'do': lambda: True},
                         {   'desc': 'Remove from scan list',
                             'do': lambda: True},
                         {   'desc': 'Show scanned',
-                            'do': lambda: True},
+                            'do': self.handlers.show_find},
                         ]},
                 'observe': {
                     'title': 'Observe (edit watch list)',

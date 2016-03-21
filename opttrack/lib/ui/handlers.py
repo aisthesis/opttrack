@@ -13,6 +13,7 @@ from functools import partial
 
 from pymongo.errors import BulkWriteError
 
+from ..dbschema import SPREADS
 from ..dbtools import delete_many, getcoll, insert_many
 from ..dbwrapper import job
 
@@ -37,6 +38,19 @@ class Handlers(object):
             job(self.logger, partial(_saveentries, entries, 'find'))
         else:
             print('Aborting: equities NOT saved!')
+        return True
+
+    def show_find(self):
+        for spread in SPREADS:
+            cursor = job(self.logger, partial(_find_fromdb, 'find', {'spread': spread['key']}))
+            equities = sorted([item['eq'] for item in cursor])
+            print('\n{}:'.format(spread['desc']))
+            if len(equities) > 0:
+                print('{} equities are being scanned'.format(len(equities)))
+                for equity in equities:
+                    print("'{}'".format(equity))
+            else:
+                print('No equities are being scanned')
         return True
 
     def track_single(self):
@@ -179,3 +193,7 @@ def _eqs_fromfile(fname):
 
 def _get_find_entries(equities, spread_type):
     return [{'eq': equity, 'spread': spread_type} for equity in equities]
+
+def _find_fromdb(collname, qry, logger, client, **kwargs):
+    coll = getcoll(client, collname, **kwargs)
+    return coll.find(qry)

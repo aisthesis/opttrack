@@ -9,14 +9,14 @@ Content for interactive editor
 
 from functools import partial
 
-from .handlers import Handlers
+from .edit_handlers import EditHandlers
 from .menu import Menu
 
 class EditMenu(Menu):
 
     def __init__(self, logger, tz):
         super(EditMenu, self).__init__(logger, tz=tz)
-        self._handlers = Handlers(self.logger, self.tz)
+        self._handlers = EditHandlers(self.logger, self.tz)
         self._menus = {
                 'main': {
                     'title': 'Main menu',

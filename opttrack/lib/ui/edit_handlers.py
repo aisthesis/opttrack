@@ -4,7 +4,7 @@ license http://opensource.org/licenses/MIT
 
 lib/ui/handlers.py
 
-Handlers for menu selections.
+Handlers for edit menu
 """
 
 from bson.codec_options import CodecOptions
@@ -17,7 +17,7 @@ from ..dbschema import SPREADS
 from ..dbtools import delete_many, getcoll, insert_many
 from ..dbwrapper import job
 
-class Handlers(object):
+class EditHandlers(object):
 
     def __init__(self, logger, tz):
         self.logger = logger

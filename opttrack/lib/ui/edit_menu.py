@@ -36,9 +36,9 @@ class EditMenu(Menu):
                         {   'desc': 'Return to main menu',
                             'do': lambda: True},
                         {   'desc': 'Add to scan list',
-                            'do': partial(self.run, 'select_find_type')},
+                            'do': partial(self.run, 'add_find')},
                         {   'desc': 'Remove from scan list',
-                            'do': lambda: True},
+                            'do': partial(self.run, 'del_find')},
                         {   'desc': 'Show scanned',
                             'do': self.handlers.show_find},
                         ]},
@@ -66,7 +66,7 @@ class EditMenu(Menu):
                         {   'desc': 'Show tracked',
                             'do': self.handlers.show_tracked},
                         ]},
-                'select_find_type': {
+                'add_find': {
                     'title': 'Select spread type',
                     'choices': [
                         {   'desc': 'Return to main menu',
@@ -76,7 +76,16 @@ class EditMenu(Menu):
                         {   'desc': 'Double calendar (not implemented)',
                             'do': lambda: True},
                         ]},
-
+                'del_find': {
+                    'title': 'Select spread type',
+                    'choices': [
+                        {   'desc': 'Return to main menu',
+                            'do': lambda: True},
+                        {   'desc': 'Diagonal butterfly',
+                            'do': partial(self.handlers.del_find, 'dgb')},
+                        {   'desc': 'Double calendar (not implemented)',
+                            'do': lambda: True},
+                        ]},
                 'track_spread': {
                     'title': 'Track spread',
                     'choices': [

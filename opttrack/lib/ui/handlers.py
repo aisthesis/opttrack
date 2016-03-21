@@ -40,6 +40,19 @@ class Handlers(object):
             print('Aborting: equities NOT saved!')
         return True
 
+    def del_find(self, spread_type):
+        equities = _eqs_fromblob(input('Underlying equities (GOOGL,TSLA,FB): '))
+        print('Remove from future scans:\n')
+        for eq in equities:
+            print("'{}'".format(eq))
+        choice = input('\nOK to proceed (y/n)? ').lower()
+        if choice == 'y':
+            entries = _get_find_entries(equities, spread_type)
+            job(self.logger, partial(_delentries, entries, 'find'))
+        else:
+            print('Aborting: equities NOT deleted!')
+        return True
+
     def show_find(self):
         for spread in SPREADS:
             cursor = job(self.logger, partial(_find_fromdb, 'find', {'spread': spread['key']}))
@@ -101,7 +114,7 @@ class Handlers(object):
         _show_track_entries((entry,))
         choice = input('\nStop tracking this option (y/n)? ').lower()
         if choice == 'y':
-            job(self.logger, partial(_delentry, entry))
+            job(self.logger, partial(_delentries, (entry,), 'track'))
         else:
             print('Aborting: option NOT deleted!')
 
@@ -127,15 +140,23 @@ def _show_track_entry(entry):
     print('Expiry: {}'.format(entry['Expiry'].strftime('%Y-%m-%d')))
     print('Strike: {:.2f}'.format(entry['Strike']))
 
-def _delentry(entry, logger, client):
-    logger.info('removing 1 option from track collection')
-    logger.debug('deleting: {}'.format(entry))
-    trackcoll = getcoll(client, 'track')
-    n_deleted = delete_many(logger, trackcoll, entry)
-    if n_deleted > 0:
-        print('{} record(s) deleted'.format(n_deleted))
+def _delentries(entries, collname, logger, client):
+    logger.info("removing {} option(s) from collection '{}'".format(len(entries), collname))
+    coll = getcoll(client, collname)
+    total_deleted = 0
+    for entry in entries:
+        n_deleted = delete_many(logger, coll, entry)
+        if n_deleted < 1:
+            logger.warn('entry to be deleted not found: {}'.format(entry))
+        total_deleted += n_deleted
+    if total_deleted == len(entries):
+        msg = '{} record(s) deleted'.format(total_deleted)
+        print(msg)
     else:
-        print('\nNo matching entry found. Record was NOT deleted.\n')
+        msg = '{} entries to be deleted but {} records deleted!'.format(len(entries), total_deleted)
+        logger.warn(msg)
+        print('WARNING: {}'.format(msg))
+        print('Did you verify that the records to be deleted were actually present?')
 
 def _saveentries(entries, collname, logger, client):
     msg = 'Saving {} entries'.format(len(entries))

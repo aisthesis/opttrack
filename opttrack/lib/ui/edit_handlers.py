@@ -14,7 +14,7 @@ from functools import partial
 from pymongo.errors import BulkWriteError
 
 from ..dbschema import SPREADS
-from ..dbtools import delete_many, getcoll, insert_many
+from ..dbtools import delete_many, find_job, getcoll, insert_many
 from ..dbwrapper import job
 
 class EditHandlers(object):
@@ -55,7 +55,7 @@ class EditHandlers(object):
 
     def show_find(self):
         for spread in SPREADS:
-            cursor = job(self.logger, partial(_find_fromdb, 'find', {'spread': spread['key']}))
+            cursor = job(self.logger, partial(find_job, 'find', {'spread': spread['key']}))
             equities = sorted([item['eq'] for item in cursor])
             print('\n{}:'.format(spread['desc']))
             if len(equities) > 0:
@@ -215,6 +215,3 @@ def _eqs_fromfile(fname):
 def _get_find_entries(equities, spread_type):
     return [{'eq': equity, 'spread': spread_type} for equity in equities]
 
-def _find_fromdb(collname, qry, logger, client, **kwargs):
-    coll = getcoll(client, collname, **kwargs)
-    return coll.find(qry)

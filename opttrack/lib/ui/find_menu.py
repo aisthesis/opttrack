@@ -24,7 +24,7 @@ class FindMenu(Menu):
                         {   'desc': 'Quit',
                             'do': lambda: False},
                         {   'desc': 'Diagonal butterfly',
-                            'do': lambda: True},
+                            'do': self.handlers.get_dgbs},
                         {   'desc': 'Double calendar (not implemented)',
                             'do': lambda: True},
                         ]},

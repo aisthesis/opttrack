@@ -32,10 +32,15 @@ def delete_many(logger, coll, entry):
     result = coll.delete_many(entry)
     n_deleted = result.deleted_count
     if n_deleted > 0:
-        logger.info('{} record deleted'.format(n_deleted))
+        logger.info('{} record(s) deleted'.format(n_deleted))
     else:
         logger.warn('Record not found: {}'.format(entry))
     return n_deleted
+
+def find_job(collname, qry, logger, client, **kwargs):
+    # can be passed to dbwrapper.job() using functools.partial
+    coll = getcoll(client, collname, **kwargs)
+    return coll.find(qry)
 
 def getcoll(client, collname, **kwargs):
     dbname = constants.DB[config.ENV]['name']

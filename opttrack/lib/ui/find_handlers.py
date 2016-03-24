@@ -67,7 +67,32 @@ class FindHandlers(object):
         return DgbFinder(opts, self.opt_factory).run()
 
 def _show_dgbs(dgbs):
-    pass
+    if len(dgbs) > 0:
+        print('')
+        for dgb in dgbs:
+            print('-' * 32)
+            _show_dgb(dgb)
+        print('=' * 32)
+    else:
+        print('\nNo spreads meeting the requirements were found.')
 
 def _show_dgb(dgb):
-    pass
+    print("{} at {:.2f}:".format(dgb['spread'].Underlying, dgb['spread'].Underlying_Price))
+    print("Metrics:")
+    print("  Credit: {:.2f}".format(dgb['metrics']['Credit']))
+    print("  Risk: {:.2f}".format(dgb['metrics']['Risk']))
+    print("  Ratio: {:.2f}".format(dgb['metrics']['Ratio']))
+    print("Straddle with expiry {}:".format(_fmt_dt(dgb['spread'].Short[0]['Expiry'])))
+    print("  Strike: {:.2f}".format(dgb['spread'].Short[0]['Strike']))
+    print("  Total: {:.2f}, {}: {:.2f}, {}: {:.2f}".format(dgb['metrics']['Near_Price'], 
+            dgb['spread'].Short[0]['Opt_Type'], dgb['spread'].Short[0]['Price'], 
+            dgb['spread'].Short[1]['Opt_Type'], dgb['spread'].Short[1]['Price']))
+    print("Strangle with expiry {}:".format(_fmt_dt(dgb['spread'].Long[0]['Expiry'])))
+    print("  Strike {:.2f} {}: {:.2f}".format(dgb['spread'].Long[0]['Strike'], 
+            dgb['spread'].Long[0]['Opt_Type'], dgb['spread'].Long[0]['Price']))
+    print("  Strike {:.2f} {}: {:.2f}".format(dgb['spread'].Long[1]['Strike'], 
+            dgb['spread'].Long[1]['Opt_Type'], dgb['spread'].Long[1]['Price']))
+    print("  Total: {:.2f}".format(dgb['metrics']['Far_Price']))
+
+def _fmt_dt(expiry):
+    return expiry.date()

@@ -15,13 +15,14 @@ SPREAD_TYPES = (
 
 class OptSpread(object):
 
-    def __init__(self, equity=None, spread_type=None, ref_price=0., **kwargs):
+    def __init__(self, equity=None, spread_type=None, eq_price=0., ref_price=0., **kwargs):
         # unconventional capitalization allows use of built-in
         # `vars()` for immediate conversion to an appropriate dict
         if equity:
             assert spread_type in SPREAD_TYPES
             self.Underlying = equity.upper()
             self.Spread_Type = spread_type
+            self.Underlying_Price = float(eq_price)
             self.Ref_Price = float(ref_price)
         else:
             for key in kwargs:

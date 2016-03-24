@@ -76,7 +76,6 @@ class DgbFinder(object):
 
     def _make_dgb(self, straddle, strangle, metrics):
         spread = self._get_spread(straddle, strangle, metrics)
-        print(vars(spread))
         dgb = {'spread': spread, 'metrics': metrics}
         return dgb
 
@@ -91,8 +90,8 @@ class DgbFinder(object):
         return strangle
 
     def _get_spread(self, straddle, strangle, metrics):
-        underlying = self.opts.data.iloc[0, :].loc['Underlying']
-        spread = OptSpread(underlying, 'dgb', metrics['Credit'])
+        underlying = self.opts.data.iloc[0].loc['Underlying']
+        spread = OptSpread(underlying, 'dgb', self.opts.data.iloc[0].loc['Underlying_Price'], metrics['Credit'])
         for opt_type in ('call', 'put',):
             spread.buy_one(self.opt_factory.make(strangle[opt_type]['Strike'], strangle[opt_type]['Expiry'],
                     opt_type, strangle[opt_type]['Price'], underlying))

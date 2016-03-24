@@ -4,7 +4,7 @@
 Copyright (c) 2016 Marshall Farrier
 license http://opensource.org/licenses/MIT
 
-Utilities for finding desirable strike prices
+Utilities for finding strike prices
 """
 
 def closest(allstrikes, eqprice):

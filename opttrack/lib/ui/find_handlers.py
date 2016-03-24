@@ -15,13 +15,15 @@ import pynance as pn
 
 from ..dbtools import find_job
 from ..dbwrapper import job
-from ..spreads.diagonal_butterfly import DiagonalButterfly
+from ..spreads.dgb_finder import DgbFinder
+from ..stockopt import StockOptFactory
 from .. import strikes
 
 class FindHandlers(object):
 
     def __init__(self, logger):
         self.logger = logger
+        self.opt_factory = StockOptFactory()
 
     def get_dgbs(self):
         """
@@ -32,7 +34,7 @@ class FindHandlers(object):
         since there is the possibility that long-term options will
         be owned for free'.
 
-        The selection logic can be found in lib.spreads.diagonal_butterfly.DiagonalButterfly
+        The selection logic can be found in lib.spreads.diagonal_butterfly.DgbFinder
         """
         cursor = job(self.logger, partial(find_job, 'find', {'spread': 'dgb'}))
         equities = sorted([item['eq'] for item in cursor])
@@ -46,22 +48,23 @@ class FindHandlers(object):
         for equity in equities:
             print('{}'.format(equity), end='')
             try:
-                dgbs_foreq = _find_dgbs_foreq(equity)
+                dgbs_foreq = self._find_dgbs_foreq(equity)
                 dgbs.extend(dgbs_foreq)
-                print('({}).'.format(len(dgbs_foreq)), end='')
+                msg = len(dgbs_foreq)
             except AttributeError:
-                print('({}).'.format('ERROR'), end='')
+                msg = '?'
                 self.logger.exception('error retrieving options data')
             except Exception:
                 traceback.print_exc()
                 self.logger.exception('error retrieving options data')
             finally:
+                print('({}).'.format(msg), end='')
                 sys.stdout.flush()
         return dgbs
 
-def _find_dgbs_foreq(equity):
-    opts = pn.opt.get(equity)
-    return DiagonalButterfly(opts).get()
+    def _find_dgbs_foreq(self, equity):
+        opts = pn.opt.get(equity)
+        return DgbFinder(opts, self.opt_factory).run()
 
 def _show_dgbs(dgbs):
     pass

@@ -28,7 +28,7 @@ class StockOptFactory(object):
         self.tz = pytz.timezone('US/Eastern')
         self.opttypes = ('call', 'put')
 
-    def make(self, strike, expiry, opttype):
+    def make(self, strike, expiry, opttype, price=None, underlying=None):
         """
         Some basic validation of inputs is used in creating
         a dictionary such as:
@@ -45,4 +45,6 @@ class StockOptFactory(object):
             opt['Expiry'] = self.tz.localize(expiry).replace(hour=19)
         else:
             opt['Expiry'] = expiry
+        opt['Underlying'] = underlying
+        opt['Price'] = price
         return opt

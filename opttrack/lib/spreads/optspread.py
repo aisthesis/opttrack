@@ -7,15 +7,17 @@ license http://opensource.org/licenses/MIT
 Generic spread class
 """
 
+from functools import reduce
+
 SPREAD_TYPES = (
         'dgb',
         'dblcal',)
 
 class OptSpread(object):
 
-    def __init__(self, equity=None, spread_type=None, ref_price=None, **kwargs):
+    def __init__(self, equity=None, spread_type=None, ref_price=0., **kwargs):
         # unconventional capitalization allows use of built-in
-        # `vars()` to create a dictionary with correct keys.
+        # `vars()` for immediate conversion to an appropriate dict
         if equity:
             assert spread_type in SPREAD_TYPES
             self.Underlying = equity.upper()
@@ -26,4 +28,23 @@ class OptSpread(object):
                 setattr(self, key, kwargs[key])
         self.Long = []
         self.Short = []
+
+    def price(self):
+        short_sum = reduce(_add_opt_prices, self.Short, 0.)
+        return reduce(_add_opt_prices, self.Long, -short_sum)
+
+    def buy_one(self, opt):
+        self.Long.append(opt)
+
+    def sell_one(self, opt):
+        self.Short.append(opt)
+
+    def buy_many(self, opts):
+        self.Long.extend(opts)
+
+    def sell_many(self, opts):
+        self.Short.extend(opts)
+
+def _add_opt_prices(opt1, opt2):
+    return opt1['Price'] + opt2['Price']
 

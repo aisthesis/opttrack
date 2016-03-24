@@ -14,6 +14,7 @@ import locale
 
 import pandas as pd
 
+from .optspread import OptSpread
 from .optutils import get_price
 from .. import strikes
 
@@ -67,17 +68,37 @@ class DgbFinder(object):
             if call_ix < 0:
                 continue
             call_end_ix = call_ix
-            strangle = {'call': {}, 'put': {}}
-            strangle['call']['Price'] = get_price(self.opts, 'call', call_strikes[call_ix], expiry)
-            strangle['put']['Price'] = get_price(self.opts, 'put', put_strike, expiry)
+            strangle = self._get_strangle(straddle, call_strikes[call_ix], put_strike, expiry)
             metrics = _get_metrics(straddle, strangle, strike_diff)
             if _meets_criteria(metrics):
                 dgbs.append(self._make_dgb(straddle, strangle, metrics))
         return dgbs
 
     def _make_dgb(self, straddle, strangle, metrics):
-        dgb = {}
+        spread = self._get_spread(straddle, strangle, metrics)
+        print(vars(spread))
+        dgb = {'spread': spread, 'metrics': metrics}
         return dgb
+
+    def _get_strangle(self, straddle, call_strike, put_strike, expiry):
+        strangle = {'call': {}, 'put': {}}
+        strangle['call']['Price'] = get_price(self.opts, 'call', call_strike, expiry)
+        strangle['call']['Expiry'] = expiry
+        strangle['call']['Strike'] = call_strike
+        strangle['put']['Price'] = get_price(self.opts, 'put', put_strike, expiry)
+        strangle['put']['Expiry'] = expiry
+        strangle['put']['Strike'] = put_strike
+        return strangle
+
+    def _get_spread(self, straddle, strangle, metrics):
+        underlying = self.opts.data.iloc[0, :].loc['Underlying']
+        spread = OptSpread(underlying, 'dgb', metrics['Credit'])
+        for opt_type in ('call', 'put',):
+            spread.buy_one(self.opt_factory.make(strangle[opt_type]['Strike'], strangle[opt_type]['Expiry'],
+                    opt_type, strangle[opt_type]['Price'], underlying))
+            spread.sell_one(self.opt_factory.make(straddle['Strike'], straddle['Expiry'],
+                    opt_type, straddle['Price'][opt_type], underlying))
+        return spread
 
     def _get_nearexpiries(self):
         min_exp = self.opts.quotetime() + pd.Timedelta('90 days')
@@ -130,6 +151,7 @@ def _meets_criteria(metrics):
 
 def _get_metrics(straddle, strangle, strike_diff):
     metrics = {}
+    metrics['Near_Price'] = straddle['Price']['total']
     metrics['Far_Price'] = strangle['call']['Price'] + strangle['put']['Price']
     metrics['Credit'] = straddle['Price']['total'] - metrics['Far_Price']
     metrics['Risk'] = strike_diff - metrics['Credit']

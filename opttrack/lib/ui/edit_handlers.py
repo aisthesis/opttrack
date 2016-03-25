@@ -10,6 +10,7 @@ Handlers for edit menu
 from bson.codec_options import CodecOptions
 import datetime as dt
 from functools import partial
+import json
 
 from pymongo.errors import BulkWriteError
 
@@ -27,9 +28,9 @@ class EditHandlers(object):
     def add_obs(self, spread_type):
         spread = SpreadUi().get(spread_type)
         if not spread:
-            print('aborted')
+            print('\nAborting: spread NOT saved!')
             return True
-        #TODO
+        job(self.logger, partial(_saveentries, (vars(spread),), 'observe'))
         return True
 
     def del_obs(self, spread_type):

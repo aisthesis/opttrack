@@ -16,12 +16,26 @@ from pymongo.errors import BulkWriteError
 from ..dbschema import SPREADS
 from ..dbtools import delete_many, find_job, getcoll, insert_many
 from ..dbwrapper import job
+from .spread_ui import SpreadUi
 
 class EditHandlers(object):
 
     def __init__(self, logger, tz):
         self.logger = logger
         self.tz = tz
+
+    def add_obs(self, spread_type):
+        spread = SpreadUi().get(spread_type)
+        if not spread:
+            print('aborted')
+            return True
+        #TODO
+        return True
+
+    def del_obs(self, spread_type):
+        #TODO
+        print('stop observing {}'.format(spread_type))
+        return True
 
     def add_find(self, spread_type):
         if _is_fromfile():

@@ -46,6 +46,9 @@ class OptSpread(object):
     def sell_many(self, opts):
         self.Short.extend(opts)
 
+    def show(self):
+        print(vars(self))
+
 def _add_opt_prices(opt1, opt2):
     return opt1['Price'] + opt2['Price']
 

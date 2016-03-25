@@ -11,11 +11,13 @@ from functools import partial
 
 from .edit_handlers import EditHandlers
 from .menu import Menu
+from .spread_selector import SpreadSelector
 
 class EditMenu(Menu):
 
     def __init__(self, logger, tz):
         super(EditMenu, self).__init__(logger, tz=tz)
+        self.spread_sel = SpreadSelector()
         self._handlers = EditHandlers(self.logger, self.tz)
         self._menus = {
                 'main': {
@@ -66,46 +68,10 @@ class EditMenu(Menu):
                         {   'desc': 'Show tracked',
                             'do': self.handlers.show_tracked},
                         ]},
-                'add_find': {
-                    'title': 'Select spread type',
-                    'choices': [
-                        {   'desc': 'Return to main menu',
-                            'do': lambda: True},
-                        {   'desc': 'Diagonal butterfly',
-                            'do': partial(self.handlers.add_find, 'dgb')},
-                        {   'desc': 'Double calendar #TODO',
-                            'do': lambda: True},
-                        ]},
-                'del_find': {
-                    'title': 'Select spread type',
-                    'choices': [
-                        {   'desc': 'Return to main menu',
-                            'do': lambda: True},
-                        {   'desc': 'Diagonal butterfly',
-                            'do': partial(self.handlers.del_find, 'dgb')},
-                        {   'desc': 'Double calendar #TODO',
-                            'do': lambda: True},
-                        ]},
-                'add_obs': {
-                    'title': 'Select spread type',
-                    'choices': [
-                        {   'desc': 'Return to main menu',
-                            'do': lambda: True},
-                        {   'desc': 'Diagonal butterfly',
-                            'do': partial(self.handlers.add_obs, 'dgb')},
-                        {   'desc': 'Double calendar #TODO',
-                            'do': lambda: True},
-                        ]},
-                'del_obs': {
-                    'title': 'Select spread type',
-                    'choices': [
-                        {   'desc': 'Return to main menu',
-                            'do': lambda: True},
-                        {   'desc': 'Diagonal butterfly',
-                            'do': partial(self.handlers.del_obs, 'dgb')},
-                        {   'desc': 'Double calendar #TODO',
-                            'do': lambda: True},
-                        ]},
+                'add_find': self.spread_sel.get(dgb=partial(self.handlers.add_find, 'dgb')), 
+                'del_find': self.spread_sel.get(dgb=partial(self.handlers.del_find, 'dgb')),
+                'add_obs': self.spread_sel.get(dgb=partial(self.handlers.add_obs, 'dgb')), 
+                'del_obs': self.spread_sel.get(dgb=partial(self.handlers.del_obs, 'dgb')), 
                 'track_spread': {
                     'title': 'Track spread',
                     'choices': [

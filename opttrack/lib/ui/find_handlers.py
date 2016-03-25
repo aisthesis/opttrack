@@ -83,15 +83,16 @@ def _show_dgb(dgb):
     print("  Risk: {:.2f}".format(dgb['metrics']['Risk']))
     print("  Ratio: {:.2f}".format(dgb['metrics']['Ratio']))
     print("Straddle with expiry {}:".format(_fmt_dt(dgb['spread'].Short[0]['Expiry'])))
-    print("  Strike: {:.2f}".format(dgb['spread'].Short[0]['Strike']))
-    print("  Total: {:.2f}, {}: {:.2f}, {}: {:.2f}".format(dgb['metrics']['Near_Price'], 
-            dgb['spread'].Short[0]['Opt_Type'], dgb['spread'].Short[0]['Price'], 
-            dgb['spread'].Short[1]['Opt_Type'], dgb['spread'].Short[1]['Price']))
+    _opt = dgb['spread'].Short[0]
+    print("  Strike: {:.2f} {}: {:.2f}".format(_opt['Strike'], _opt['Opt_Type'], _opt['Price']))
+    _opt = dgb['spread'].Short[1]
+    print("  Strike: {:.2f} {}: {:.2f}".format(_opt['Strike'], _opt['Opt_Type'], _opt['Price']))
+    print("  Total: {:.2f}".format(dgb['metrics']['Near_Price'])) 
     print("Strangle with expiry {}:".format(_fmt_dt(dgb['spread'].Long[0]['Expiry'])))
-    print("  Strike {:.2f} {}: {:.2f}".format(dgb['spread'].Long[0]['Strike'], 
-            dgb['spread'].Long[0]['Opt_Type'], dgb['spread'].Long[0]['Price']))
-    print("  Strike {:.2f} {}: {:.2f}".format(dgb['spread'].Long[1]['Strike'], 
-            dgb['spread'].Long[1]['Opt_Type'], dgb['spread'].Long[1]['Price']))
+    _opt = dgb['spread'].Long[0]
+    print("  Strike: {:.2f} {}: {:.2f}".format(_opt['Strike'], _opt['Opt_Type'], _opt['Price']))
+    _opt = dgb['spread'].Long[1]
+    print("  Strike: {:.2f} {}: {:.2f}".format(_opt['Strike'], _opt['Opt_Type'], _opt['Price']))
     print("  Total: {:.2f}".format(dgb['metrics']['Far_Price']))
 
 def _fmt_dt(expiry):

@@ -18,4 +18,4 @@ def get_price(opts, opt_type, strike, expiry):
         return opts.price.get(opt_type, strike, expiry)
     except KeyError:
         strikestr = locale.format("%0.2f", strike, grouping=True)
-        return opts.price.get(opttype, strikestr, exp)
+        return opts.price.get(opt_type, strikestr, expiry)

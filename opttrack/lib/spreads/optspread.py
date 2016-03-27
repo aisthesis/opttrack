@@ -1,5 +1,5 @@
 """
-./opttrack/lib/optspread.py
+./opttrack/lib/spreads/optspread.py
 
 Copyright (c) 2016 Marshall Farrier
 license http://opensource.org/licenses/MIT
@@ -11,9 +11,10 @@ from functools import reduce
 
 from .. import stockopt
 
-SPREAD_TYPES = (
-        'dgb',
-        'dblcal',)
+SPREAD_TYPES = {
+        'dgb': 'diagonal butterfly',
+        'dblcal': 'double calendar',
+        }
 
 class OptSpread(object):
 
@@ -53,7 +54,7 @@ class OptSpread(object):
 
     def show(self, show_price=True, show_eq_price=True, show_metrics=True):
         stock_price_txt = ' at {:.2f}'.format(self.Underlying_Price) if show_eq_price else ''
-        print('{}{}:'.format(self.Underlying, stock_price_txt))
+        print('{}{} ({}):'.format(self.Underlying, stock_price_txt, SPREAD_TYPES[self.Spread_Type]))
         if show_metrics:
             self.show_metrics()
         for title in ('Long', 'Short',):

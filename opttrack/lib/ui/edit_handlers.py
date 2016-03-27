@@ -17,8 +17,10 @@ from pymongo.errors import BulkWriteError
 from ..dbschema import SPREADS
 from ..dbtools import delete_many, find_job, getcoll, insert_many
 from ..dbwrapper import job
+from ..spreads.optspread import SPREAD_TYPES
 from ..spreads.optspread_factory import OptSpreadFactory
 from .spread_ui import SpreadUi
+from .utils import confirm
 
 class EditHandlers(object):
 
@@ -35,16 +37,22 @@ class EditHandlers(object):
         return True
 
     def del_obs(self, spread_type):
-        #TODO
-        print('stop observing {}'.format(spread_type))
+        underlying = input('Underlying: ').strip().upper()
+        wrapped_spreads = self._get_observed({'Underlying': underlying, 
+                'Spread_Type': spread_type})
+        if len(wrapped_spreads) == 0:
+            print('\nNo {} spreads found for {}'.format(SPREAD_TYPES[spread_type], underlying))
+        else:
+            self._del_obs(wrapped_spreads)
         return True
 
     def show_obs(self, spread_type):
-        spread_factory = OptSpreadFactory(self.tz)
-        cursor = job(self.logger, partial(find_job, 'observe', {'Spread_Type': spread_type},
-                codec_options=CodecOptions(tz_aware=True)))
-        for item in cursor:
-            spread_factory.make(item).show(False, False, False)
+        wrapped_spreads = self._get_observed({'Spread_Type': spread_type})
+        if not len(wrapped_spreads):
+            print('\nNo {} spreads found.'.format(SPREAD_TYPES[spread_type]))
+        for item in wrapped_spreads:
+            print('')
+            item['spread'].show(False, False, False)
         return True
 
     def add_find(self, spread_type):
@@ -116,6 +124,34 @@ class EditHandlers(object):
         job(self.logger, partial(_show_tracked, self.tz, underlying))
         return True
 
+    def _del_obs(self, wrapped_spreads):
+        if len(wrapped_spreads) == 1:
+            self._del_obs_unique(wrapped_spreads[0])
+        else:
+            self._del_obs_select(wrapped_spreads)
+
+    def _del_obs_unique(self, wrapped_spread):
+        print('\nStop observing the following spread:\n')
+        wrapped_spread['spread'].show(False, False, False)
+        print('')
+        if confirm():
+            job(self.logger, partial(_delentries, ({'_id': wrapped_spread['_id']},), 'observe'))
+        else:
+            print('\nAborting: spread NOT deleted!')
+
+    def _del_obs_select(self, wrapped_spreads):
+        print('Multiple {} spreads found for {}.'.format(SPREAD_TYPES[wrapped_spreads[0]['spread'].Spread_Type],
+                wrapped_spreads[0]['spread'].Underlying))
+        print('Select spread to delete:')
+        for i in range(len(wrapped_spreads)):
+            print('\n({})'.format(i + 1))
+            wrapped_spreads[i]['spread'].show(False, False, False)
+        choice = int(input('\nEnter number for spread to delete: '))
+        if not 0 < choice <= len(wrapped_spreads):
+            print('\nInvalid selection!')
+            return
+        self._del_obs_unique(wrapped_spreads[choice - 1])
+
     def _get_track_entry(self):
         entry = {}
         entry['Underlying'] = input('Underlying equity: ').strip().upper()
@@ -142,6 +178,15 @@ class EditHandlers(object):
         else:
             print('Aborting: option NOT deleted!')
 
+    def _get_observed(self, qry):
+        spread_factory = OptSpreadFactory(self.tz)
+        cursor = job(self.logger, partial(find_job, 'observe', qry,
+                codec_options=CodecOptions(tz_aware=True)))
+        wrapped_spreads = []
+        for item in cursor:
+            wrapped_spreads.append({'spread': spread_factory.make(item), '_id': item['_id']})
+        return wrapped_spreads
+
     def _getexpdt(self, expirytxt):
         # on 2016-02-19 expired options were unavailable on yahoo by 7:30 pm EST
         return self.tz.localize(dt.datetime.strptime(expirytxt, '%Y-%m-%d')).replace(hour=19)
@@ -165,19 +210,19 @@ def _show_track_entry(entry):
     print('Strike: {:.2f}'.format(entry['Strike']))
 
 def _delentries(entries, collname, logger, client):
-    logger.info("removing {} option(s) from collection '{}'".format(len(entries), collname))
+    logger.info("removing {} record(s) from collection '{}'".format(len(entries), collname))
     coll = getcoll(client, collname)
     total_deleted = 0
     for entry in entries:
         n_deleted = delete_many(logger, coll, entry)
         if n_deleted < 1:
-            logger.warn('entry to be deleted not found: {}'.format(entry))
+            logger.warn('record to be deleted not found: {}'.format(entry))
         total_deleted += n_deleted
     if total_deleted == len(entries):
         msg = '{} record(s) deleted'.format(total_deleted)
         print(msg)
     else:
-        msg = '{} entries to be deleted but {} records deleted!'.format(len(entries), total_deleted)
+        msg = '{} records queued for deletion but {} records were deleted!'.format(len(entries), total_deleted)
         logger.warn(msg)
         print('WARNING: {}'.format(msg))
         print('Did you verify that the records to be deleted were actually present?')

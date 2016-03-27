@@ -54,7 +54,7 @@ class EditMenu(Menu):
                         {   'desc': 'Stop observing',
                             'do': partial(self.run, 'del_obs')},
                         {   'desc': 'Show observed',
-                            'do': lambda: True},
+                            'do': partial(self.run, 'show_obs')},
                         ]},
                 'track': {
                     'title': 'Track menu',
@@ -72,6 +72,7 @@ class EditMenu(Menu):
                 'del_find': self.spread_sel.get(dgb=partial(self.handlers.del_find, 'dgb')),
                 'add_obs': self.spread_sel.get(dgb=partial(self.handlers.add_obs, 'dgb')), 
                 'del_obs': self.spread_sel.get(dgb=partial(self.handlers.del_obs, 'dgb')), 
+                'show_obs': self.spread_sel.get(dgb=partial(self.handlers.show_obs, 'dgb')), 
                 'track_spread': {
                     'title': 'Track spread',
                     'choices': [

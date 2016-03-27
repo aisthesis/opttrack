@@ -7,7 +7,7 @@ lib/ui/spread_selector.py
 Template for selecting spreads.
 """
 
-import copy
+from copy import deepcopy
 
 class SpreadSelector(object):
 
@@ -27,7 +27,7 @@ class SpreadSelector(object):
                     ]}
 
     def get(self, **kwargs):
-        menu = copy.deepcopy(self.template)
+        menu = deepcopy(self.template)
         for choice in menu['choices']:
             choice['do'] = kwargs.get(choice['abbr'], lambda: True)
         return menu

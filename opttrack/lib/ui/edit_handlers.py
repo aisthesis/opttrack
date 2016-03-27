@@ -17,6 +17,7 @@ from pymongo.errors import BulkWriteError
 from ..dbschema import SPREADS
 from ..dbtools import delete_many, find_job, getcoll, insert_many
 from ..dbwrapper import job
+from ..spreads.optspread_factory import OptSpreadFactory
 from .spread_ui import SpreadUi
 
 class EditHandlers(object):
@@ -36,6 +37,14 @@ class EditHandlers(object):
     def del_obs(self, spread_type):
         #TODO
         print('stop observing {}'.format(spread_type))
+        return True
+
+    def show_obs(self, spread_type):
+        spread_factory = OptSpreadFactory(self.tz)
+        cursor = job(self.logger, partial(find_job, 'observe', {'Spread_Type': spread_type},
+                codec_options=CodecOptions(tz_aware=True)))
+        for item in cursor:
+            spread_factory.make(item).show(False, False, False)
         return True
 
     def add_find(self, spread_type):

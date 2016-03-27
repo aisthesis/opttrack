@@ -71,29 +71,7 @@ def _show_dgbs(dgbs):
         print('')
         for dgb in dgbs:
             print('-' * 32)
-            _show_dgb(dgb)
+            dgb.show()
         print('=' * 32)
     else:
         print('\nNo spreads meeting the requirements were found.')
-
-def _show_dgb(dgb):
-    print("{} at {:.2f}:".format(dgb['spread'].Underlying, dgb['spread'].Underlying_Price))
-    print("Metrics:")
-    print("  Credit: {:.2f}".format(dgb['metrics']['Credit']))
-    print("  Risk: {:.2f}".format(dgb['metrics']['Risk']))
-    print("  Ratio: {:.2f}".format(dgb['metrics']['Ratio']))
-    print("Straddle with expiry {}:".format(_fmt_dt(dgb['spread'].Short[0]['Expiry'])))
-    _opt = dgb['spread'].Short[0]
-    print("  Strike: {:.2f} {}: {:.2f}".format(_opt['Strike'], _opt['Opt_Type'], _opt['Price']))
-    _opt = dgb['spread'].Short[1]
-    print("  Strike: {:.2f} {}: {:.2f}".format(_opt['Strike'], _opt['Opt_Type'], _opt['Price']))
-    print("  Total: {:.2f}".format(dgb['metrics']['Near_Price'])) 
-    print("Strangle with expiry {}:".format(_fmt_dt(dgb['spread'].Long[0]['Expiry'])))
-    _opt = dgb['spread'].Long[0]
-    print("  Strike: {:.2f} {}: {:.2f}".format(_opt['Strike'], _opt['Opt_Type'], _opt['Price']))
-    _opt = dgb['spread'].Long[1]
-    print("  Strike: {:.2f} {}: {:.2f}".format(_opt['Strike'], _opt['Opt_Type'], _opt['Price']))
-    print("  Total: {:.2f}".format(dgb['metrics']['Far_Price']))
-
-def _fmt_dt(expiry):
-    return expiry.date()

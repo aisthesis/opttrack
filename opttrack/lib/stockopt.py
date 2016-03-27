@@ -24,27 +24,51 @@ import six
 
 class StockOptFactory(object):
 
-    def __init__(self):
-        self.tz = pytz.timezone('US/Eastern')
+    def __init__(self, tz=None):
+        self.tz = tz if tz else pytz.timezone('US/Eastern')
         self.opttypes = ('call', 'put')
 
-    def make(self, strike, expiry, opttype, price=None, underlying=None):
+    def make(self, strike=None, expiry=None, opttype=None, price=None, underlying=None, **kwargs):
         """
+        Creates a well-formed option dictionary from positional parameters, if provided,
+        or from keyword arguments.
+
+        If positional arguments are provided, then the following are required:
+            strike
+            expiry
+            opttype
+
         Some basic validation of inputs is used in creating
         a dictionary such as:
         {   'Strike': 13.0,
             'Opt_Type': 'call',
             'Expiry': datetime.datetime(2015, 6, 7, 19, 0, tzinfo=<DstTzInfo 'US/Eastern' EDT-1 day, 20:00:00 DST>)}
         """
-        assert opttype in self.opttypes 
-        opt = {'Strike': float(strike), 
-                'Opt_Type': opttype}
-        if isinstance(expiry, six.string_types):
-            opt['Expiry'] = self.tz.localize(dt.datetime.strptime(expiry, '%Y-%m-%d')).replace(hour=19)
-        elif expiry.tzinfo is None:
-            opt['Expiry'] = self.tz.localize(expiry).replace(hour=19)
+        if strike:
+            assert opttype in self.opttypes 
+            opt = {'Strike': float(strike), 
+                    'Opt_Type': opttype}
+            if isinstance(expiry, six.string_types):
+                opt['Expiry'] = self.tz.localize(dt.datetime.strptime(expiry, '%Y-%m-%d')).replace(hour=19)
+            elif expiry.tzinfo is None:
+                opt['Expiry'] = self.tz.localize(expiry).replace(hour=19)
+            else:
+                opt['Expiry'] = expiry.astimezone(self.tz)
+            opt['Underlying'] = underlying
+            opt['Price'] = price or 0.
+            return opt
+        opt = {}
+        for key in kwargs:
+            opt[key] = kwargs[key]
+        if opt['Expiry'].tzinfo is None:
+            opt['Expiry'] = self.tz.localize(opt['Expiry']).replace(hour=19)
         else:
-            opt['Expiry'] = expiry
-        opt['Underlying'] = underlying
-        opt['Price'] = price
+            opt['Expiry'] = opt['Expiry'].astimezone(self.tz)
+        if 'Price' not in opt or opt['Price'] is None:
+            opt['Price'] = 0.
         return opt
+
+def get_repr(opt, show_price=True):
+    price_txt = ': {:.2f}'.format(opt['Price']) if show_price else ''
+    return 'Strike {:.2f} {} expiring {}{}'.format(opt['Strike'], opt['Opt_Type'], 
+            opt['Expiry'].strftime('%Y-%m-%d'), price_txt)

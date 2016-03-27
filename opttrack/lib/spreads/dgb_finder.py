@@ -71,13 +71,8 @@ class DgbFinder(object):
             strangle = self._get_strangle(straddle, call_strikes[call_ix], put_strike, expiry)
             metrics = _get_metrics(straddle, strangle, strike_diff)
             if _meets_criteria(metrics):
-                dgbs.append(self._make_dgb(straddle, strangle, metrics))
+                dgbs.append(self._get_spread(straddle, strangle, metrics))
         return dgbs
-
-    def _make_dgb(self, straddle, strangle, metrics):
-        spread = self._get_spread(straddle, strangle, metrics)
-        dgb = {'spread': spread, 'metrics': metrics}
-        return dgb
 
     def _get_strangle(self, straddle, call_strike, put_strike, expiry):
         strangle = {'call': {}, 'put': {}}

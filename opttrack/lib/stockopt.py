@@ -42,12 +42,18 @@ class StockOptFactory(object):
         a dictionary such as:
         {   'Strike': 13.0,
             'Opt_Type': 'call',
-            'Expiry': datetime.datetime(2015, 6, 7, 19, 0, tzinfo=<DstTzInfo 'US/Eastern' EDT-1 day, 20:00:00 DST>)}
+            'Expiry': datetime.datetime(2015, 6, 7, 19, 0, tzinfo=<DstTzInfo 'US/Eastern' EDT-1 day, 20:00:00 DST>),
+            'Final_Price': None}
+
+        The 'Final_Price' key is initially set to False and should be set to True after expiry
+        when 'Price' is also set to the inherent value of the option on expiry, which
+        requires a web query to determine.
         """
+        opt = {'Final_Price': False}
         if strike:
             assert opttype in self.opttypes 
-            opt = {'Strike': float(strike), 
-                    'Opt_Type': opttype}
+            opt['Strike'] = float(strike)
+            opt['Opt_Type'] = opttype
             if isinstance(expiry, six.string_types):
                 opt['Expiry'] = self.tz.localize(dt.datetime.strptime(expiry, '%Y-%m-%d')).replace(hour=19)
             elif expiry.tzinfo is None:
@@ -57,7 +63,6 @@ class StockOptFactory(object):
             opt['Underlying'] = underlying
             opt['Price'] = price or 0.
             return opt
-        opt = {}
         for key in kwargs:
             opt[key] = kwargs[key]
         if opt['Expiry'].tzinfo is None:

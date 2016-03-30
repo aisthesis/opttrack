@@ -19,6 +19,8 @@ from ..spreads.dgb_finder import DgbFinder
 from ..stockopt import StockOptFactory
 from .. import strikes
 
+SEP_LEN = 48
+
 class FindHandlers(object):
 
     def __init__(self, logger):
@@ -70,8 +72,8 @@ def _show_dgbs(dgbs):
     if len(dgbs) > 0:
         print('')
         for dgb in dgbs:
-            print('-' * 32)
+            print('-' * SEP_LEN)
             dgb.show()
-        print('=' * 32)
+        print('=' * SEP_LEN)
     else:
         print('\nNo spreads meeting the requirements were found.')

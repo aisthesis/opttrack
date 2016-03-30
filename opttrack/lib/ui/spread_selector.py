@@ -26,8 +26,12 @@ class SpreadSelector(object):
                         'do': None},
                     ]}
 
-    def get(self, **kwargs):
+    def get(self, overrides=None, **kwargs):
         menu = deepcopy(self.template)
         for choice in menu['choices']:
-            choice['do'] = kwargs.get(choice['abbr'], lambda: True)
+            if overrides and choice['abbr'] in overrides:
+                choice['desc'] = overrides[choice['abbr']]['desc']
+                choice['do'] = overrides[choice['abbr']]['do']
+            else:
+                choice['do'] = kwargs.get(choice['abbr'], lambda: True)
         return menu

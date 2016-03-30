@@ -42,6 +42,21 @@ def find_job(collname, qry, logger, client, **kwargs):
     coll = getcoll(client, collname, **kwargs)
     return coll.find(qry)
 
+def update_job(collname, filters, update_docs, logger, client, **kwargs):
+    # can be passed to dbwrapper.job() using functools.partial
+    # filters and update_docs must match
+    assert len(filters) == len(update_docs)
+    coll = getcoll(client, collname, **kwargs)
+    n_matched = 0
+    n_modified = 0
+    logger.info('running {} update queries'.format(len(queries)))
+    for i in len(filters):
+        result = coll.update_many(filters[i], update_docs[i], **kwargs)
+        n_matched += result.matched_count
+        n_modified += result.modified_count
+    logger.info('{} records modified of {} records matched'.format(n_modified, n_matched))
+    return n_matched, n_modified
+
 def getcoll(client, collname, **kwargs):
     dbname = constants.DB[config.ENV]['name']
     _db = client[dbname]

@@ -5,8 +5,6 @@
 Interactively start and stop tracking an option.
 """
 
-from functools import partial
-
 import pytz
 
 from lib.dbtools import create_all_indices

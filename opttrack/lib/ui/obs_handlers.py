@@ -74,10 +74,10 @@ class ObsHandlers(object):
     def _update_in_db(self, wrapped_spreads):
         if not wrapped_spreads:
             return
-        print('Updating database for expired options')
+        print('{} spread(s) include an expired option, updating database'.format(len(wrapped_spreads)))
         filters, update_docs = _get_update_queries(wrapped_spreads)
         _, n_modified = job(self.logger, partial(update_job, 'observe', filters, update_docs))
-        print('{} spread(s) updated'.format(n_modified))
+        print('Database updated for {} spread(s)'.format(n_modified))
 
 def _get_update_queries(wrapped_spreads):
     filters = []

@@ -165,7 +165,7 @@ def _update_one(optdata, eqdata, opt):
         return False
     except KeyError:
         if opt['Expiry'] < pytz.utc.localize(dt.datetime.utcnow()):
-            if not eqdata or opt['Expiry'] < eqdata.index[0]:
+            if eqdata is None or opt['Expiry'] < opt['Expiry'].tzinfo.localize(eqdata.index[0]):
                 raise UnfinalizedPrice
             _finalize(eqdata, opt)
             return True

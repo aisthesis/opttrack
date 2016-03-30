@@ -49,8 +49,8 @@ def update_job(collname, filters, update_docs, logger, client, **kwargs):
     coll = getcoll(client, collname, **kwargs)
     n_matched = 0
     n_modified = 0
-    logger.info('running {} update queries'.format(len(queries)))
-    for i in len(filters):
+    logger.info('running {} update queries'.format(len(filters)))
+    for i in range(len(filters)):
         result = coll.update_many(filters[i], update_docs[i], **kwargs)
         n_matched += result.matched_count
         n_modified += result.modified_count

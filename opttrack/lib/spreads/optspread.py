@@ -120,14 +120,15 @@ class OptSpread(object):
 
     def _show_dgb_perf(self):
         perf = self._get_dgb_perf()
-        for key in ('profit', 'risk', 'return',):
+        for key in ('original value', 'current value', 'profit', 'risk', 'return',):
             print('  {}: {:.2f}'.format(key.capitalize(), perf[key]))
 
     def _get_dgb_perf(self):
         perf = {}
+        perf['original value'] = self.Ref_Price
         perf['risk'] = self.Ref_Price + abs(self.Short[0]['Strike'] - self.Long[0]['Strike'])
-        value = self.get_value()
-        perf['profit'] = value - self.Ref_Price
+        perf['current value'] = self.get_value()
+        perf['profit'] = perf['current value'] - self.Ref_Price
         perf['return'] = safe_divide(perf['profit'], perf['risk'])
         return perf
 

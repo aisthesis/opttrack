@@ -49,8 +49,8 @@ class ObsHandlers(object):
         equities = sorted(wrapped_spreads.keys())
         to_show = []
         for equity in equities:
-            self._update_foreq(equity, wrapped_spreads)
-            to_show.extend(wrapped_spreads[equity])
+            if self._update_foreq(equity, wrapped_spreads):
+                to_show.extend(wrapped_spreads[equity])
         _show_wrapped_spreads(to_show)
 
     def _update_foreq(self, equity, wrapped_spreads):
@@ -69,7 +69,13 @@ class ObsHandlers(object):
                 eqdata = pn.data.get(equity, earliest_expiry.replace(hour=0), None)
                 if wrapped_spread['spread'].update(optdata, eqdata):
                     update_in_mongo.append(wrapped_spread)
+            except KeyError:
+                print('Error! Insufficient data to update spread')
+                print('Does spread contain an invalid strike or expiry?')
+                wrapped_spread['spread'].show(False, False, False)
+                return False
         self._update_in_db(update_in_mongo)
+        return True
 
     def _update_in_db(self, wrapped_spreads):
         if not wrapped_spreads:

@@ -7,6 +7,7 @@ lib/ui/handlers.py
 Handlers for find menu
 """
 
+from bson.codec_options import CodecOptions
 from functools import partial
 
 import pynance as pn
@@ -31,7 +32,9 @@ class ObsHandlers(object):
         return True
 
     def _get(self, spread_type):
-        cursor = job(self.logger, partial(find_job, 'observe', {'Spread_Type': spread_type}))
+        codec_opts = CodecOptions(tz_aware=True)
+        cursor = job(self.logger, partial(find_job, 'observe', {'Spread_Type': spread_type},
+                codec_options=codec_opts))
         wrapped_spreads = {}
         for record in cursor:
             spread = self.spread_factory.make(record)

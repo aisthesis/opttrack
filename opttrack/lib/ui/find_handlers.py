@@ -20,6 +20,10 @@ from ..stockopt import StockOptFactory
 from .. import strikes
 
 SEP_LEN = 48
+MAX_FAILURES = 4
+
+class DataUnavailable(Exception):
+    pass
 
 class FindHandlers(object):
 
@@ -47,7 +51,10 @@ class FindHandlers(object):
     def _find_dgbs(self, equities):
         print('scanning {} equities for diagonal butterfly spreads'.format(len(equities)))
         dgbs = []
+        n_failures = 0
         for equity in equities:
+            if n_failures >= MAX_FAILURES and not dgbs:
+                raise DataUnavailable
             print('{}'.format(equity), end='')
             msg = '?'
             try:
@@ -55,9 +62,10 @@ class FindHandlers(object):
                 dgbs.extend(dgbs_foreq)
                 msg = len(dgbs_foreq)
             except AttributeError:
-                msg = '?'
+                n_failures += 1
                 self.logger.exception('error retrieving options data')
             except Exception:
+                n_failures += 1
                 traceback.print_exc()
                 self.logger.exception('error retrieving options data')
             finally:

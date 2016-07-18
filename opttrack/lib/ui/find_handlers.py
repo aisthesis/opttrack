@@ -49,6 +49,7 @@ class FindHandlers(object):
         dgbs = []
         for equity in equities:
             print('{}'.format(equity), end='')
+            msg = '?'
             try:
                 dgbs_foreq = self._find_dgbs_foreq(equity)
                 dgbs.extend(dgbs_foreq)
